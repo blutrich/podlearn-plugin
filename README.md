@@ -1,60 +1,71 @@
-# PodLearn for Claude Code
+<div align="center">
 
-One install gives Claude Code the **PodLearn skill + MCP server** — research,
-transcribe, search, and learn from podcasts and YouTube videos, with cited
-transcripts and AI-generated lessons.
+# 🎧 PodLearn for Claude Code
 
-This replaces the old two-step setup (`curl … | bash` for the skill **and** a
-manual `claude mcp add` for the MCP). Installs and updates are now managed by
-Claude Code's plugin system.
+**Turn any podcast or YouTube video into searchable transcripts and AI lessons — without leaving Claude Code.**
 
-## Install
+[![Claude Code plugin](https://img.shields.io/badge/Claude_Code-plugin-d97757)](https://code.claude.com/docs/en/plugins)
+[![MCP included](https://img.shields.io/badge/MCP-server_bundled-5436DA)](https://podlearn.vercel.app)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-3DA639)](./LICENSE)
 
-**1. Get your token** (free) — generate a personal MCP token at
-**https://podlearn.vercel.app/settings**. It looks like `pl_mcp_…`. Keep it handy.
+</div>
 
-**2. Add the marketplace and install the plugin** inside Claude Code:
+One install gives Claude Code the **PodLearn skill *and* MCP server** — discover,
+transcribe, search, and learn from podcasts and YouTube, with cited transcripts
+and AI-generated lessons. It replaces the old two-step setup (`curl … | bash` for
+the skill **plus** a manual `claude mcp add` for the MCP). Installs, updates, and
+the token prompt are all managed by Claude Code.
+
+---
+
+## ⚡ Install
+
+> **1. Get your token** (free) at **[podlearn.vercel.app/settings](https://podlearn.vercel.app/settings)** — a `pl_mcp_…` token. Keep it handy.
+
+**2. Add the marketplace and install** — in Claude Code:
 
 ```
 /plugin marketplace add blutrich/podlearn
 /plugin install podlearn@podlearn
 ```
 
-**3. Paste your token when prompted.** On install, Claude Code asks for your
-*PodLearn MCP token* — paste the `pl_mcp_…` token from step 1. It's stored
-securely in your system keychain (not in any settings file), and the bundled
-MCP authenticates with it automatically. No environment variables to set.
+**3. Paste your token when prompted.** Claude Code asks for your *PodLearn MCP
+token* on install — paste the `pl_mcp_…` from step 1. It's stored in your system
+keychain (never a settings file, never an env var), and the bundled MCP
+authenticates with it automatically.
 
-**4. Restart Claude Code** (or `claude reload`). Try:
+**4. Restart Claude Code** (or `claude reload`), then try:
 
-> "What podcasts do you have about AI agents?"
-> "Transcribe this and make me a lesson: <youtube or podcast URL>"
+> 💬 *"What podcasts do you have about AI agents?"*
+> 💬 *"Transcribe this and make me a lesson: ‹youtube or podcast URL›"*
+> 💬 *"Find the best quotes about pricing from ‹episode›"*
 
-## What you get
+---
 
-- **Skill** (`podlearn`) — routes your intent through the MCP tools so you don't
-  have to think about which tool to call.
-- **MCP server** — `search_podcasts`, `search_youtube`, `search_episodes`,
-  `list_feed_episodes`, `transcribe_url`, `transcribe_feed` (bulk/season),
-  `get_transcription`, `search_transcription`, `generate_lesson`, and more.
+## 📦 What's inside
 
-## Update / remove
+| | |
+|---|---|
+| **Skill** (`podlearn`) | Routes your intent through the MCP tools so you never think about tool dispatch. |
+| **MCP server** | `search_podcasts`, `search_youtube`, `search_episodes`, `list_feed_episodes`, `transcribe_url`, `transcribe_feed` (bulk/season), `get_transcription`, `search_transcription`, `generate_lesson`, and more. |
+
+## 🔄 Manage
 
 ```
-/plugin marketplace update podlearn
-/plugin uninstall podlearn@podlearn
-/plugin marketplace remove podlearn
+/plugin marketplace update podlearn      # pull the latest
+/plugin uninstall podlearn@podlearn      # remove the plugin
+/plugin marketplace remove podlearn      # remove the marketplace
 ```
 
-## Notes
+## 🔐 Notes
 
-- The MCP authenticates with **your** token, which you entered when prompted on
-  install (stored in your system keychain). If a tool returns an auth error,
-  re-check the token in `/plugin` config, or generate a fresh one at
-  podlearn.vercel.app/settings.
-- Paid actions (`transcribe_url`, `transcribe_feed`, `generate_lesson`) use your
-  PodLearn credits — the skill confirms cost before spending.
+- The MCP authenticates with **your** token (entered on the install prompt,
+  stored in the keychain). Auth error? Re-check the token in `/plugin` config or
+  generate a fresh one at [podlearn.vercel.app/settings](https://podlearn.vercel.app/settings).
+- Paid actions (`transcribe_url`, `transcribe_feed`, `generate_lesson`) spend
+  PodLearn credits — the skill confirms cost before charging.
 
-## License
+## 📄 License
 
-AGPL-3.0 — see the [PodLearn repository](https://github.com/blutrich/podlearn).
+[AGPL-3.0](./LICENSE) — © 2026 Ofer Blutrich. Built on the
+[PodLearn](https://podlearn.vercel.app) platform.
