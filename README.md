@@ -46,18 +46,27 @@ skill handles the routing; the MCP does the work. You just talk.
 
 > **1. Grab your token** (free, 2 credits to try) at **[podlearn.ai/settings](https://podlearn.ai/settings)** — a `pl_mcp_…` token. Keep it handy.
 
-**2. Add the marketplace and install** — in Claude Code:
+**2. Add the marketplace** — in Claude Code (run this on its own, wait for confirmation):
 
 ```
 /plugin marketplace add blutrich/podlearn-plugin
+```
+
+**3. Install the plugin** — then run:
+
+```
 /plugin install podlearn@podlearn
 ```
 
-**3. Paste your token when prompted.** Claude Code asks for your *PodLearn MCP
-token* on install. It's stored in your system keychain (never a settings file,
-never an env var), and the bundled MCP authenticates automatically.
+> ⚠️ Run them **one at a time** — they're two separate slash commands. Pasting
+> both lines at once makes Claude treat the second as part of the first.
 
-**4. Restart Claude Code** (or `claude reload`) and start asking.
+**4. Paste your token when prompted.** Claude Code asks for your *PodLearn MCP
+token* on install. It's stored in your system keychain (never a settings file,
+never an env var), and the bundled MCP authenticates automatically — **no
+separate `claude mcp add`**, the plugin registers the server for you.
+
+**5. Restart Claude Code** (or `claude reload`) and start asking.
 
 That's it. The plugin ships the skill **and** the MCP, so there's no separate
 `claude mcp add` step and nothing to wire up by hand.
@@ -68,6 +77,31 @@ That's it. The plugin ships the skill **and** the MCP, so there's no separate
 |---|---|
 | **Skill** (`podlearn`) | Routes your intent through the MCP tools so you never think about which one to call. |
 | **MCP server** | `search_podcasts` · `search_youtube` · `search_episodes` · `list_feed_episodes` · `transcribe_url` · `transcribe_feed` (bulk/season) · `get_transcription` · `search_transcription` · `generate_lesson` · `generate_linkedin_post` · and more. |
+
+## 🔌 Just the MCP server (without the plugin)
+
+The plugin already bundles the server, so most people don't need this. But if you
+want the MCP on its own — in **Claude Desktop**, **Cursor**, **ChatGPT**, or any
+other MCP client, or in Claude Code without the skill — add it directly.
+
+**Claude Code** (one command, with your token from [podlearn.ai/settings](https://podlearn.ai/settings)):
+
+```bash
+claude mcp add --transport http podlearn \
+  https://httiyebjgxxwtgggkpgw.supabase.co/functions/v1/mcp-server-streamable \
+  --header "Authorization: Bearer pl_mcp_YOUR_TOKEN"
+```
+
+**Any MCP client** (Desktop, Cursor, etc.) — point it at the Streamable HTTP endpoint:
+
+| Field | Value |
+|---|---|
+| Transport | Streamable HTTP (`http`) |
+| URL | `https://httiyebjgxxwtgggkpgw.supabase.co/functions/v1/mcp-server-streamable` |
+| Header | `Authorization: Bearer pl_mcp_YOUR_TOKEN` |
+
+Generate the `pl_mcp_…` token at [podlearn.ai/settings](https://podlearn.ai/settings).
+Full tool reference: [podlearn.ai/mcp-docs](https://podlearn.ai/mcp-docs).
 
 ## 🔄 Manage
 
