@@ -5,7 +5,7 @@
 **Turn any podcast or YouTube video into searchable transcripts and AI lessons — without leaving Claude Code.**
 
 [![Claude Code plugin](https://img.shields.io/badge/Claude_Code-plugin-d97757)](https://code.claude.com/docs/en/plugins)
-[![MCP included](https://img.shields.io/badge/MCP-server_bundled-5436DA)](https://podlearn.vercel.app)
+[![MCP included](https://img.shields.io/badge/MCP-server_bundled-5436DA)](https://podlearn.ai)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-3DA639)](./LICENSE)
 
 </div>
@@ -20,12 +20,12 @@ the token prompt are all managed by Claude Code.
 
 ## ⚡ Install
 
-> **1. Get your token** (free) at **[podlearn.vercel.app/settings](https://podlearn.vercel.app/settings)** — a `pl_mcp_…` token. Keep it handy.
+> **1. Get your token** (free) at **[podlearn.ai/settings](https://podlearn.ai/settings)** — a `pl_mcp_…` token. Keep it handy.
 
 **2. Add the marketplace and install** — in Claude Code:
 
 ```
-/plugin marketplace add blutrich/podlearn
+/plugin marketplace add blutrich/podlearn-plugin
 /plugin install podlearn@podlearn
 ```
 
@@ -61,11 +61,11 @@ authenticates with it automatically.
 
 - The MCP authenticates with **your** token (entered on the install prompt,
   stored in the keychain). Auth error? Re-check the token in `/plugin` config or
-  generate a fresh one at [podlearn.vercel.app/settings](https://podlearn.vercel.app/settings).
+  generate a fresh one at [podlearn.ai/settings](https://podlearn.ai/settings).
 - Paid actions (`transcribe_url`, `transcribe_feed`, `generate_lesson`) spend
   PodLearn credits — the skill confirms cost before charging.
 
 ## 📄 License
 
 [AGPL-3.0](./LICENSE) — © 2026 Ofer Blutrich. Built on the
-[PodLearn](https://podlearn.vercel.app) platform.
+[PodLearn](https://podlearn.ai) platform.

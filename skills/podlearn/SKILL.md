@@ -11,7 +11,7 @@ Turn podcasts into citable, searchable knowledge. This skill orchestrates the Po
 
 This skill consumes the **PodLearn MCP server**. Configure it once:
 
-1. Sign in at <https://podlearn.vercel.app> (free trial = 2 episode credits)
+1. Sign in at <https://podlearn.ai> (free trial = 2 episode credits)
 2. Go to **Settings → API Tokens → Generate New Token**. Copy the `pl_mcp_…` string (it is shown once).
 3. Install the MCP server in Claude Code:
 

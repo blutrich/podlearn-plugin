@@ -1,12 +1,12 @@
 {
   "name": "podlearn",
-  "owner": { "name": "Ofer Blutrich", "url": "https://podlearn.vercel.app" },
+  "owner": { "name": "Ofer Blutrich", "url": "https://podlearn.ai" },
   "description": "PodLearn for Claude Code — the skill + MCP server for learning from podcasts and YouTube.",
   "plugins": [
     {
       "name": "podlearn",
       "source": "./",
-      "description": "PodLearn skill + MCP server: transcribe and learn from podcasts and YouTube (needs a free token from podlearn.vercel.app/settings)."
+      "description": "PodLearn skill + MCP server: transcribe and learn from podcasts and YouTube (needs a free token from podlearn.ai/settings)."
     }
   ]
 }
