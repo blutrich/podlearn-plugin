@@ -1,0 +1,12 @@
+{
+  "name": "podlearn",
+  "version": "1.0.0",
+  "description": "Research, transcribe, search, and learn from podcasts and YouTube videos. Bundles the PodLearn MCP server plus a skill that routes intent through its tools (search, transcribe a URL or a whole feed, pull cited transcripts, generate lessons).",
+  "author": { "name": "Ofer Blutrich", "url": "https://podlearn.vercel.app" },
+  "homepage": "https://podlearn.vercel.app/skills",
+  "repository": "https://github.com/blutrich/podlearn",
+  "license": "AGPL-3.0",
+  "keywords": ["podcast", "youtube", "transcription", "transcript", "mcp", "learning", "lessons"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}
