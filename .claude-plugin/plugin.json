@@ -7,6 +7,15 @@
   "repository": "https://github.com/blutrich/podlearn",
   "license": "AGPL-3.0",
   "keywords": ["podcast", "youtube", "transcription", "transcript", "mcp", "learning", "lessons"],
+  "userConfig": {
+    "mcpToken": {
+      "type": "string",
+      "title": "PodLearn MCP token",
+      "description": "Your personal PodLearn token (starts with pl_mcp_). Generate it at https://podlearn.vercel.app/settings.",
+      "sensitive": true,
+      "required": true
+    }
+  },
   "skills": "./skills/",
   "mcpServers": "./.mcp.json"
 }

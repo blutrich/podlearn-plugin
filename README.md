@@ -11,22 +11,19 @@ Claude Code's plugin system.
 ## Install
 
 **1. Get your token** (free) — generate a personal MCP token at
-**https://podlearn.vercel.app/settings**. It looks like `pl_mcp_…`.
+**https://podlearn.vercel.app/settings**. It looks like `pl_mcp_…`. Keep it handy.
 
-**2. Set it as an environment variable** so the bundled MCP can authenticate.
-Add this to your `~/.zshrc` (or `~/.bashrc`) so it persists, then restart your
-terminal:
-
-```bash
-export PODLEARN_MCP_TOKEN=pl_mcp_your_token_here
-```
-
-**3. Add the marketplace and install the plugin** inside Claude Code:
+**2. Add the marketplace and install the plugin** inside Claude Code:
 
 ```
 /plugin marketplace add blutrich/podlearn
 /plugin install podlearn@podlearn
 ```
+
+**3. Paste your token when prompted.** On install, Claude Code asks for your
+*PodLearn MCP token* — paste the `pl_mcp_…` token from step 1. It's stored
+securely in your system keychain (not in any settings file), and the bundled
+MCP authenticates with it automatically. No environment variables to set.
 
 **4. Restart Claude Code** (or `claude reload`). Try:
 
@@ -51,9 +48,10 @@ export PODLEARN_MCP_TOKEN=pl_mcp_your_token_here
 
 ## Notes
 
-- The MCP authenticates with **your** token (`${PODLEARN_MCP_TOKEN}`), resolved
-  from your shell environment when Claude Code starts. If a tool returns an auth
-  error, make sure the env var is set and relaunch.
+- The MCP authenticates with **your** token, which you entered when prompted on
+  install (stored in your system keychain). If a tool returns an auth error,
+  re-check the token in `/plugin` config, or generate a fresh one at
+  podlearn.vercel.app/settings.
 - Paid actions (`transcribe_url`, `transcribe_feed`, `generate_lesson`) use your
   PodLearn credits — the skill confirms cost before spending.
 
