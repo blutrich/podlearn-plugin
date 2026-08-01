@@ -1,0 +1,25 @@
+# Codex/ChatGPT-native skill metadata (D-3). Additive: Claude Code ignores this
+# file entirely — SKILL.md remains the single source of truth for both clients
+# (fact 5 in specs/2026-07-31-mcp-skill-codex/requirements.md: Codex 0.144.5
+# loads the Claude-format plugin manifest and this SKILL.md verbatim). Shape
+# matches OpenAI's real, shipped example
+# (specs/2026-07-31-mcp-skill-codex/samples/codex-agents-openai-yaml-example.yaml)
+# and specs/2026-07-31-mcp-skill-codex/samples/openai-plugins-build-skills.md.
+#
+# License note (D-8): this skill is distributed via
+# https://github.com/blutrich/podlearn-plugin under GNU AGPL-3.0 — the network
+# clause applies to modified network deployments of the PodLearn service, not
+# to using this skill/MCP client-side.
+
+interface:
+  display_name: "PodLearn"
+  short_description: "Search, transcribe, and learn from podcasts and YouTube via the PodLearn MCP server"
+  default_prompt: "Use PodLearn to search podcasts and YouTube, read cited transcripts, and generate structured lessons — route podcast/YouTube/transcript/learning requests through its MCP tools instead of guessing."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "podlearn"
+      description: "PodLearn MCP server — 25 tools: search 4M+ podcasts + YouTube, transcribe any episode/video URL, full-text transcript search, AI lessons, LinkedIn post generation"
+      transport: "streamable_http"
+      url: "https://podlearn.ai/mcp"

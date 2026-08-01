@@ -10,7 +10,7 @@ Use when the user is interested in ONE specific episode: "summarize Lex Fridman'
    - **User gave you a podcast but said "latest"**: same as the first sub-path with `limit: 1`.
 
 2. **Get the goods.** Two main shapes depending on the ask:
-   - **Whole-episode synthesis** (summarize, study guide, key takeaways): `get_transcription(episode_id)`. Get the full text. Reason locally.
+   - **Whole-episode synthesis** (summarize, study guide, key takeaways): `get_transcription(episode_id, offset?, max_chars?)`. Get the full text — paginated at 120k chars/call, honor `has_more`/`next_offset` on long episodes. Reason locally.
    - **Focused look-up** (find a topic, find a quote, find a timestamp): `search_transcription(episode_id, query: <topic>)`. Returns just the matching chunks. Faster, cheaper on context.
 
 3. **Add timestamps if asked.** If the user wants "where in the episode does X happen" — `get_transcription_segments(episode_id)` returns `(start_time, end_time, content)` rows. Map your synthesis findings to segments.

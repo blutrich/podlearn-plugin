@@ -13,8 +13,8 @@ MP3 / youtu.be) and wants to transcribe / summarize / lesson-ify the episode.
 
 2. **MANDATORY database check (hard gate — never skip).** Before spending a
    credit, prove it isn't already transcribed:
-   - `search_episodes(title_keywords, status: 'transcribed')` — local table,
-     all podcasts.
+   - `search_episodes(query: <title keywords>, status: 'transcribed')` — local
+     table, all podcasts.
    - If empty, `search_podcasts(keywords)` → if a `local` podcast matches,
      `list_episodes(podcast_id, status: 'completed')`.
    - If a completed match exists → jump to step 5 with that `episode_id` and
