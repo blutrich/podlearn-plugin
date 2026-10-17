@@ -9,24 +9,39 @@ Turn podcasts into citable, searchable knowledge. This skill orchestrates the Po
 
 ## Setup (one-time)
 
-This skill consumes the **PodLearn MCP server** — **25 tools**, live at `https://podlearn.ai/mcp` (Streamable HTTP, the modern spec 2025-03-26+ transport, negotiating protocol `2025-11-25`). Configure it once:
+This skill consumes the **PodLearn MCP server**: **25 tools** at `https://podlearn.ai/mcp` (Streamable HTTP, protocol `2025-11-25`). Sign in with OAuth; no key to copy.
 
-1. Sign in at <https://podlearn.ai> (free trial = 2 episode credits)
-2. Go to **Settings → API Tokens → Generate New Token**. Copy the `pl_mcp_YOUR_TOKEN_HERE`-shaped string (it is shown once).
-3. Install the MCP server in Claude Code:
+| Host | Connect |
+|---|---|
+| Claude Code (local) | `claude mcp add --transport http podlearn https://podlearn.ai/mcp`, then `/mcp` → podlearn → **Authenticate** (or `claude mcp login podlearn`) |
+| Claude.ai, Claude Desktop, Claude mobile | Settings → Connectors → Add custom connector → `https://podlearn.ai/mcp` → Connect |
+| Claude Code on the web / phone | Use the claude.ai connector above. The cloud sandbox cannot reach podlearn.ai, so a server added inside the session never connects. |
+| Codex CLI | `codex mcp add podlearn --url https://podlearn.ai/mcp`, then `codex mcp login podlearn --scopes mcp:read,mcp:write` |
+| stdio-only clients | The pinned **mcp-remote 0.14.3** bridge config on https://podlearn.ai/mcp-docs |
 
-```sh
-claude mcp add --transport http podlearn \
-  https://podlearn.ai/mcp \
-  --header "Authorization: Bearer pl_mcp_YOUR_TOKEN_HERE"
-```
+During sign-in the client listens on a local callback port. Keep the client waiting until it reports success; if the browser lands on `localhost:<port>/…callback` with "refused to connect", the client stopped waiting. Start the sign-in again.
 
-Then `claude mcp list` should show **PodLearn Transcripts** as connected.
+**Permissions.** **mcp:read** covers the 18 read tools. **mcp:write** is required by seven: **start_transcription**, **transcribe_url**, **transcribe_feed**, **generate_lesson**, **generate_linkedin_post**, **save_item**, **remove_saved_item**. A connection registered read-only cannot be upgraded by re-authorizing; add PodLearn again as a new connection that requests both scopes. Never silently replace a denied OAuth grant with a full-access token.
 
-> `https://podlearn.ai/mcp` is the canonical URL — it's the server's own advertised identity (its 401 `WWW-Authenticate` names this resource) and the identity the connector icon ships under. The underlying Supabase endpoint
-> (`https://httiyebjgxxwtgggkpgw.supabase.co/functions/v1/mcp-server-streamable`) still works and remains valid if you're already configured against it. The legacy endpoints `/mcp-server` (vanilla HTTP) and `/mcp-server-sse` (2024-11-05 SSE) still work too and expose the same 25 tools — use them only if your MCP client doesn't support Streamable HTTP yet.
+**Personal tokens** (headless clients only): create one in **Settings → API Tokens** and send it only as **Authorization: Bearer**. Never in a URL, chat, committed config, logs, or process arguments. The server ignores `?token=` query parameters (see Connection problems). Codex can read one from the environment with `--bearer-token-env-var PODLEARN_MCP_TOKEN`.
 
-If the MCP isn't connected when this skill runs, stop and tell the user to run the install command above — don't proceed without it.
+> OAuth tokens are bound to the exact URL used during authorization. Prefer the canonical `https://podlearn.ai/mcp`; a direct Supabase endpoint is a separate resource needing its own sign-in. Legacy HTTP/SSE transports expose 24 tools (no episode picker).
+
+### Connection problems
+
+Diagnose before telling the user PodLearn is down:
+
+| Symptom | Cause | What to do |
+|---|---|---|
+| Server shows connected but every tool call hangs (no error after a minute or more) | An old config passes the token as `?token=` in the URL. Discovery works anonymously, then each call gets 401 and the client waits for a browser sign-in that never completes. | Stop the call. Tell the user to remove that server and add `https://podlearn.ai/mcp` again with OAuth. |
+| Two PodLearn connections are available (e.g. a local `podlearn` server and a claude.ai connector) and one hangs or 401s | Each connection has its own credentials | Use the one that answers; name the broken one to the user |
+| 401 / "Authentication required" | Sign-in expired or token revoked | Sign in again at the same URL (`/mcp` → Authenticate, or `codex mcp login podlearn`) |
+| 403 insufficient_scope on a write tool | Read-only connection | New connection requesting both scopes; still confirm cost before spending |
+| Paid call returns "failed (credit refunded)" | Server-side transcription failure; the server refunded | Report the exact error once; do not retry in a loop or switch to another paid tool to compensate |
+| Account or entitlement denial | Out of credits or plan limit | `get_user_credits` / `get_subscription_status`, then tell the user |
+| A discovery dependency fails (e.g. YouTube search key) | Upstream service, not the connection | Use another discovery tool or ask for a source URL; never start paid processing to work around it |
+
+If no PodLearn connection is available at all, say so and point to the setup table. Do not invent transcripts or tool results.
 
 **Using this from OpenAI Codex?** See `agents/openai.yaml` in this skill's directory (Codex-native metadata, additive — Claude Code ignores it) and `docs/use-podlearn-from-codex.md` in the repo for the full OAuth/bearer walkthrough.
 
@@ -62,14 +77,14 @@ Whatever workflow you pick, you'll be composing a small set of MCP tools. The na
 - **`transcribe_feed(feed_id, max?, since?, before?)`** — the BULK / whole-season version of `transcribe_url`. Resolves a feed's episodes (pass the `feed_id` from `search_podcasts` / `list_feed_episodes`), skips ones already transcribed (free), and kicks off the rest in one call — up to `max` (hard cap 25). COSTS 1 credit per newly enqueued episode (or subscription quota) — confirm the cost with the user first. ENQUEUE-AND-POLL: returns each enqueued `episode_id` plus counts (`enqueued`, `skipped_completed`, `remaining_untranscribed`, `credits_used`); poll `get_episode_details(episode_id)` until `transcription_status === 'completed'`. Use when the user wants a season / many episodes rather than one at a time. `remaining_untranscribed > 0` means more are available — raise `max` or page back with `before`.
 - **`start_transcription(episode_id)`** — kicks off transcription for an episode ALREADY in the library. Returns immediately; transcript becomes available later. Default model is Gemini (`gemini-3.1-flash-lite`), with AssemblyAI as fallback. **Paid action — confirm cost first (see guardrails).**
 
-**Read & search** (free, unlimited for content already in the library):
+**Read & search** (no transcription credit for existing content; account access still applies):
 - **`get_transcription(episode_id, offset?, max_chars?)`** — the transcript text. **This is the foundational primitive** — most synthesis flows pull this first, then reason locally over it. **Paginated at 120,000 chars/call** (Claude.ai/Desktop caps a tool result at ~150k chars). If the response has `has_more: true`, call again with `offset: <next_offset>`.
 - **`search_transcription(episode_id, query)`** — keyword search inside ONE transcript. Returns matching chunks with surrounding context. Use this when the user asked about a topic and you want the relevant sections, not the whole hour.
-- **`get_transcription_segments(episode_id)`** — timestamped segments (`start_time`, `end_time`, `content` rows). Use when the user wants timestamps (e.g., "jump to where they discuss X").
+- **`get_transcription_segments(episode_id, start_time?, end_time?)`** — timestamped segments (`start_time`, `end_time`, `content` rows). Use when the user wants timestamps (e.g., "jump to where they discuss X").
 
 **Lessons & sharing:**
 - **`generate_lesson(episode_id)`** — AI-generated lesson (key takeaways + structured notes) from a completed transcript. **Paid action on first generation — confirm cost first (see guardrails).** Cached lesson returned free on subsequent calls.
-- **`list_lessons(limit?, offset?)`** — the caller's saved AI-generated lessons.
+- **`list_lessons(limit?, offset?, episode_id?)`** — the caller's saved AI-generated lessons.
 - **`get_lesson_content(lesson_id)`** — full content of one saved lesson. Use to retrieve prior synthesis, not to create new ones.
 - **`generate_linkedin_post(lesson_id?, episode_id?)`** — turns an EXISTING lesson into a LinkedIn-ready share post. The lesson must already exist; if the user says "make me a LinkedIn post about episode X" and no lesson exists yet, run `generate_lesson` first, then this. Accepts `lesson_id` directly or `episode_id` (uses the most recent lesson for that episode by the caller).
 
@@ -77,9 +92,9 @@ Whatever workflow you pick, you'll be composing a small set of MCP tools. The na
 - **`get_subscription_status()`** — the caller's subscription plan + active/expired status + period end. Check before kicking off a paid transcription if the user seems credit-constrained.
 - **`get_user_credits()`** — the caller's remaining transcription credits. Check before kicking off a paid transcription if the user seems credit-constrained.
 - **`get_episode_usage(limit?, offset?)`** — the caller's episode-access usage history for the current billing period.
-- **`get_saved_items()`** — the caller's bookmarked episodes and lessons. **Takes no arguments.**
+- **`get_saved_items(limit?, offset?)`** — the caller's bookmarked episodes and lessons, with pagination.
 - **`save_item(item_type, item_id)`** — bookmark an episode or lesson for the caller. `item_type` is `episode` or `lesson`.
-- **`remove_saved_item(saved_item_id)`** — permanently remove a bookmark. **The only tool the server annotates `destructiveHint: true` — always confirm with the user before calling it.** `saved_item_id` comes from `get_saved_items`.
+- **`remove_saved_item(saved_item_id)`** — permanently remove a bookmark. **The only tool annotated `destructiveHint: true` — obtain authorization unless the user already requested this exact removal.** `saved_item_id` comes from `get_saved_items`; this does not delete the transcript.
 
 For full per-tool I/O schemas, ask the MCP via `tools/list`.
 
@@ -99,11 +114,13 @@ Without citations the user has no way to drill into the source, and the skill be
 
 ## Behavioral guardrails
 
-**The server's own words on paid actions** (this is the MCP server's `instructions` field, quoted verbatim — trust it over any paraphrase):
+**The current server initialize instruction**, quoted verbatim. The complete rule below also covers bulk transcription as its tool description requires:
 
 > Agent-facing podcast transcript library. Always cite episode_id in synthesis. For paid actions (start_transcription, transcribe_url, generate_lesson) confirm cost with the user before invoking — credit gates enforce server-side but the user should see the cost choice explicitly.
 
-The three paid tools, by name: **`start_transcription`**, **`transcribe_url`**, and **`generate_lesson`**. Each costs 1 credit (or burns subscription quota) — `generate_lesson` only on its first call for an episode; cached lessons are free. `remove_saved_item` is the only tool the server marks `destructiveHint: true`; it isn't a paid action, but confirm with the user before calling it too — it's a permanent delete.
+That verbatim initialize instruction omits **transcribe_feed**. Apply the complete four-tool spending guard: **start_transcription**, **transcribe_url**, **transcribe_feed**, and **generate_lesson**. Single transcription costs one credit or subscription quota unit. The lesson tool advertises one credit/quota unit on first generation, but its current handler checks entitlement without an explicit debit; that advertised amount is unverified and needs an actual usage check. Do not report a lesson credit as spent without evidence. Cached lessons avoid another generation. Bulk transcription skips completed episodes and charges one credit per newly enqueued episode, with a hard cap of 25 per call. Set an explicit maximum and explain the total bound before enqueueing. Transcription credits are refunded on failure by the server; do not promise unobserved quota refunds or refunds for every paid operation.
+
+Write consent and spending authorization are separate. Honor an existing explicit authorization for the same episodes and bounded cost; do not ask again merely because another tool call is needed. Otherwise explain the cost and wait for authorization. **remove_saved_item** permanently deletes a bookmark (not the transcript); use the returned saved-item ID and obtain deletion authorization unless the user already requested that exact removal.
 
 **MANDATORY: check the database BEFORE any paid transcription.** This is a hard
 gate — never call `transcribe_url` or `start_transcription` without first
@@ -122,10 +139,10 @@ If you find a completed match, jump straight to `get_transcription(episode_id)`
 reusing it — no credit spent."
 
 **Don't waste the user's credits.** Transcription costs money. Before calling
-`transcribe_url` / `start_transcription` / `generate_lesson` (first call):
+`transcribe_url` / `start_transcription` / `transcribe_feed` / `generate_lesson` (first generation):
 - Run the MANDATORY DB check above (transcription only).
-- Confirm cost with the user: "this will use 1 credit, OK?" and wait — credit
-  gates enforce server-side but the user should see the cost choice explicitly.
+- Reuse existing explicit spending authorization if its scope and maximum cover
+  the operation. Otherwise state the single or bulk cost bound and wait for authorization.
 
 **Don't fabricate episode IDs.** Episode IDs come from `search_podcasts → list_episodes → get_episode_details` or from `search_transcription` results. Never invent a UUID.
 

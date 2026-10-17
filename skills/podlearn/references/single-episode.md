@@ -7,7 +7,7 @@ Use when the user is interested in ONE specific episode: "summarize Lex Fridman'
 1. **Identify the episode.** Three sub-paths:
    - **User named the podcast and episode**: `search_podcasts(query: <podcast name>)` → pick the right `podcast.id` → `list_episodes(podcast_id, status: 'completed', limit: 10)` → pick the episode by title or ordinal (`latest` = the first returned). Confirm with the user if ambiguous.
    - **User gave you an episode_id directly**: skip ahead.
-   - **User gave you a podcast but said "latest"**: same as the first sub-path with `limit: 1`.
+   - **User gave you a podcast but said "latest"**: discover the actual latest episode with `list_feed_episodes` when an upstream feed is available, or `list_episodes(podcast_id, limit: 1)` without a completed-only filter. The latest completed transcript may be older than the show's latest episode; disclose that distinction.
 
 2. **Get the goods.** Two main shapes depending on the ask:
    - **Whole-episode synthesis** (summarize, study guide, key takeaways): `get_transcription(episode_id, offset?, max_chars?)`. Get the full text — paginated at 120k chars/call, honor `has_more`/`next_offset` on long episodes. Reason locally.
@@ -19,7 +19,7 @@ Use when the user is interested in ONE specific episode: "summarize Lex Fridman'
 
 ## Common edge cases
 
-- **`transcription_status !== 'completed'`** in `get_episode_details`. Don't call `get_transcription` — it'll error or return empty. Tell the user: "this episode hasn't been transcribed yet. Want me to start it? (1 credit)"
+- **`transcription_status !== 'completed'`** in `get_episode_details`. Do not invent a transcript. Check credits/subscription and existing spending authorization; starting transcription needs mcp:write and can spend one credit/quota unit. Obtain authorization if not already covered.
 
 - **User asks "what was that quote about Y"** — don't grep the full transcript yourself. Use `search_transcription(episode_id, query: 'Y')`. The server does this faster and more accurately.
 
@@ -28,6 +28,12 @@ Use when the user is interested in ONE specific episode: "summarize Lex Fridman'
 - **Episode is in Hebrew** — the transcript shape is identical; just synthesize in the user's language. The Hebrew flag is set per-episode automatically; you don't have to do anything.
 
 ## Cost shape
+
+Reading existing content needs mcp:read and spends no transcription credit.
+First lesson generation, if requested, needs mcp:write plus spending authorization;
+check existing lessons first. A 401 needs reconnecting at the exact authorized
+resource; insufficient-scope 403 needs an explicit write grant, never a silent
+switch to a full-access personal token.
 
 Per single-episode synthesis:
 - 1 `search_podcasts` (if needed): cheap

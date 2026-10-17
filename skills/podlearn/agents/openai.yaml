@@ -13,8 +13,8 @@
 
 interface:
   display_name: "PodLearn"
-  short_description: "Search, transcribe, and learn from podcasts and YouTube via the PodLearn MCP server"
-  default_prompt: "Use PodLearn to search podcasts and YouTube, read cited transcripts, and generate structured lessons — route podcast/YouTube/transcript/learning requests through its MCP tools instead of guessing."
+  short_description: "Research podcasts and YouTube with cited transcripts"
+  default_prompt: "Use PodLearn MCP to search and read cited transcripts. Prefer OAuth at the canonical endpoint; request write consent when needed. Before any of the four paid tools, reuse existing content and honor or obtain bounded spending authorization. Never invent tool results."
 
 dependencies:
   tools:

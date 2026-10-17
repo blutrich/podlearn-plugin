@@ -31,6 +31,12 @@ This workflow is **search-driven, not enumerate-driven**. There is no way to ite
 
 ## Cost shape
 
+This read-only workflow needs mcp:read and spends no transcription credits.
+An untranscribed candidate is not permission to start a paid job: follow the
+from-URL workflow with mcp:write and explicit bounded spending authorization
+if the user wants it processed. Reconnect at the same endpoint after a 401;
+report entitlement or provider failures separately from missing OAuth scopes.
+
 Per cross-episode research:
 - 1-3 `search_podcasts`: cheap
 - 3-8 `list_episodes`: cheap
