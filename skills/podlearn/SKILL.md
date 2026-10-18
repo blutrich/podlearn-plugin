@@ -23,7 +23,7 @@ During sign-in the client listens on a local callback port. Keep the client wait
 
 **Permissions.** **mcp:read** covers the 18 read tools. **mcp:write** is required by seven: **start_transcription**, **transcribe_url**, **transcribe_feed**, **generate_lesson**, **generate_linkedin_post**, **save_item**, **remove_saved_item**. A connection registered read-only cannot be upgraded by re-authorizing; add PodLearn again as a new connection that requests both scopes. Never silently replace a denied OAuth grant with a full-access token.
 
-**Personal tokens** (headless clients only): create one in **Settings → API Tokens** and send it only as **Authorization: Bearer**. Never in a URL, chat, committed config, logs, or process arguments. The server ignores `?token=` query parameters (see Connection problems). Codex can read one from the environment with `--bearer-token-env-var PODLEARN_MCP_TOKEN`.
+**Personal tokens** (headless clients only): create one in **Settings → API Tokens** and send it only as **Authorization: Bearer**. Never in a URL, chat, committed config, logs, or process arguments. The server ignores tokens placed in the URL query string (see Connection problems). Codex can read one from the environment with `--bearer-token-env-var PODLEARN_MCP_TOKEN`.
 
 > OAuth tokens are bound to the exact URL used during authorization. Prefer the canonical `https://podlearn.ai/mcp`; a direct Supabase endpoint is a separate resource needing its own sign-in. Legacy HTTP/SSE transports expose 24 tools (no episode picker).
 
@@ -33,7 +33,7 @@ Diagnose before telling the user PodLearn is down:
 
 | Symptom | Cause | What to do |
 |---|---|---|
-| Server shows connected but every tool call hangs (no error after a minute or more) | An old config passes the token as `?token=` in the URL. Discovery works anonymously, then each call gets 401 and the client waits for a browser sign-in that never completes. | Stop the call. Tell the user to remove that server and add `https://podlearn.ai/mcp` again with OAuth. |
+| Server shows connected but every tool call hangs (no error after a minute or more) | An old config puts the token in the URL query string. Discovery works anonymously, then each call gets 401 and the client waits for a browser sign-in that never completes. | Stop the call. Tell the user to remove that server and add `https://podlearn.ai/mcp` again with OAuth. |
 | Two PodLearn connections are available (e.g. a local `podlearn` server and a claude.ai connector) and one hangs or 401s | Each connection has its own credentials | Use the one that answers; name the broken one to the user |
 | 401 / "Authentication required" | Sign-in expired or token revoked | Sign in again at the same URL (`/mcp` → Authenticate, or `codex mcp login podlearn`) |
 | 403 insufficient_scope on a write tool | Read-only connection | New connection requesting both scopes; still confirm cost before spending |
