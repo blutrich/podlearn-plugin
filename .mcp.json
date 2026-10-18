@@ -1,9 +1,6 @@
 {
   "podlearn": {
     "type": "http",
-    "url": "https://httiyebjgxxwtgggkpgw.supabase.co/functions/v1/mcp-server-streamable",
-    "headers": {
-      "Authorization": "Bearer ${user_config.mcpToken}"
-    }
+    "url": "https://podlearn.ai/mcp"
   }
 }

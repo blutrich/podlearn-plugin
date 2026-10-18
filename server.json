@@ -3,7 +3,7 @@
   "name": "io.github.blutrich/podlearn",
   "title": "PodLearn",
   "description": "Search 4M+ podcasts & YouTube, transcribe any episode, search transcripts, generate AI lessons.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "websiteUrl": "https://podlearn.ai",
   "repository": {
     "url": "https://github.com/blutrich/podlearn-plugin",
@@ -12,12 +12,12 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://httiyebjgxxwtgggkpgw.supabase.co/functions/v1/mcp-server-streamable",
+      "url": "https://podlearn.ai/mcp",
       "headers": [
         {
           "name": "Authorization",
-          "description": "Bearer pl_mcp_... token \u2014 create one at https://podlearn.ai/settings",
-          "isRequired": true,
+          "description": "Optional: Bearer pl_mcp_... personal token for headless clients. Interactive clients sign in with OAuth.",
+          "isRequired": false,
           "isSecret": true
         }
       ]

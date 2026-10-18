@@ -44,7 +44,7 @@ skill handles the routing; the MCP does the work. You just talk.
 
 ## ⚡ Install (60 seconds)
 
-> **1. Grab your token** (free, 2 credits to try) at **[podlearn.ai/settings](https://podlearn.ai/settings)** — a `pl_mcp_…` token. Keep it handy.
+> **1. Have a PodLearn account** (free, 2 credits to try) at **[podlearn.ai](https://podlearn.ai)**. No token needed: you sign in once in your browser.
 
 **2. Add the marketplace** — in Claude Code (run this on its own, wait for confirmation):
 
@@ -61,12 +61,12 @@ skill handles the routing; the MCP does the work. You just talk.
 > ⚠️ Run them **one at a time** — they're two separate slash commands. Pasting
 > both lines at once makes Claude treat the second as part of the first.
 
-**4. Paste your token when prompted.** Claude Code asks for your *PodLearn MCP
-token* on install. It's stored in your system keychain (never a settings file,
-never an env var), and the bundled MCP authenticates automatically — **no
-separate `claude mcp add`**, the plugin registers the server for you.
+**4. Restart Claude Code** (or `claude reload`).
 
-**5. Restart Claude Code** (or `claude reload`) and start asking.
+**5. Sign in.** Run `/mcp`, pick **podlearn**, choose **Authenticate**, and
+approve PodLearn in the browser. Approve both read and write if you want
+Claude to transcribe and save things for you (it still asks before spending
+credits). Then start asking.
 
 That's it. The plugin ships the skill **and** the MCP, so there's no separate
 `claude mcp add` step and nothing to wire up by hand.
@@ -84,24 +84,37 @@ The plugin already bundles the server, so most people don't need this. But if yo
 want the MCP on its own — in **Claude Desktop**, **Cursor**, **ChatGPT**, or any
 other MCP client, or in Claude Code without the skill — add it directly.
 
-**Claude Code** (one command, with your token from [podlearn.ai/settings](https://podlearn.ai/settings)):
+**Claude app** (web, desktop, mobile): Settings → Connectors → Add custom
+connector → paste `https://podlearn.ai/mcp` → Connect, and sign in.
+
+**Claude Code:**
 
 ```bash
-claude mcp add --transport http podlearn \
-  https://httiyebjgxxwtgggkpgw.supabase.co/functions/v1/mcp-server-streamable \
-  --header "Authorization: Bearer pl_mcp_YOUR_TOKEN"
+claude mcp add --transport http podlearn https://podlearn.ai/mcp
 ```
 
-**Any MCP client** (Desktop, Cursor, etc.) — point it at the Streamable HTTP endpoint:
+Then `/mcp` → **podlearn** → **Authenticate**.
+
+**Codex:**
+
+```bash
+codex mcp add podlearn --url https://podlearn.ai/mcp
+codex mcp login podlearn --scopes mcp:read,mcp:write
+```
+
+**Any MCP client** — point it at the Streamable HTTP endpoint and sign in with OAuth:
 
 | Field | Value |
 |---|---|
 | Transport | Streamable HTTP (`http`) |
-| URL | `https://httiyebjgxxwtgggkpgw.supabase.co/functions/v1/mcp-server-streamable` |
-| Header | `Authorization: Bearer pl_mcp_YOUR_TOKEN` |
+| URL | `https://podlearn.ai/mcp` |
+| Auth | OAuth (sign in with your PodLearn account) |
 
-Generate the `pl_mcp_…` token at [podlearn.ai/settings](https://podlearn.ai/settings).
-Full tool reference: [podlearn.ai/mcp-docs](https://podlearn.ai/mcp-docs).
+Headless client that can't open a browser? Create a personal token in
+[Settings → API Tokens](https://podlearn.ai/settings) and send it as the
+`Authorization: Bearer …` header. Never put it in the URL: tokens in the
+query string are ignored, and calls will hang waiting for a sign-in.
+Full setup guide: [podlearn.ai/mcp-docs](https://podlearn.ai/mcp-docs).
 
 ## 🔄 Manage
 
@@ -113,9 +126,13 @@ Full tool reference: [podlearn.ai/mcp-docs](https://podlearn.ai/mcp-docs).
 
 ## 🔐 Notes
 
-- **Your data, your token.** The MCP authenticates with the token you entered on
-  the install prompt (stored in your keychain). Auth error? Re-check it in
-  `/plugin` config or generate a fresh one at [podlearn.ai/settings](https://podlearn.ai/settings).
+- **Your account, your permissions.** The MCP signs in with OAuth; you choose
+  read-only or read + write in the browser. Auth error or "insufficient scope"?
+  Run `/mcp` → **podlearn** → re-authenticate. To get write access after a
+  read-only sign-in, remove and re-add the server first.
+- **Upgrading from 1.0.x?** The old token prompt is gone. Update the
+  marketplace, reinstall, restart, then sign in with `/mcp`. You can revoke the
+  old `pl_mcp_…` token in [Settings → API Tokens](https://podlearn.ai/settings).
 - **Transparent pricing.** Reading and searching transcripts already in your
   library is free. Paid actions (`transcribe_url`, `transcribe_feed`,
   `generate_lesson`) spend PodLearn credits, and the skill confirms the cost
